@@ -20,7 +20,7 @@ from sklearn.metrics import r2_score, mean_squared_error
 from tqdm import tqdm
 from xgboost import DMatrix
 
-folder_name = 'Test_R2_HYPEROPT_SMOTE_clustering'
+folder_name = 'Test_R2_HYPEROPT_SMOTE'
 
 # Ignore the warnings, let pandas print the full message and do some overall settings for matplotlib.
 warnings.filterwarnings('ignore')
@@ -36,7 +36,7 @@ def original_dataloader(room: int):
     """
     This function is the observation dataloader
     """
-    data = pd.read_csv('summer_data_compiled.csv', index_col=0).drop(['Time', 'Hour', 'Date'], axis=1)
+    data = pd.read_csv('demo/sample_data.csv', index_col=0).drop(['Time', 'Hour'], axis=1)
     data = data[data.AC > 0]
     room_data = data[data.Location == room]
     y = room_data['AC']
@@ -92,6 +92,7 @@ def plot_distribution(room: int):
     predict = list(model.predict(matrix))
     full_r2 = round(r2_score(real, predict), 4)
     full_rmse = round(math.sqrt(mean_squared_error(real, predict)), 4)
+    print(full_rmse)
 
     error = pd.read_csv('./{}/error.csv'.format(folder_name), index_col=None)
     room_error = error[error.room == room].reset_index(drop=True)
@@ -245,21 +246,23 @@ def plot_room_number_data_and_R2():
 
 # The main function
 if __name__ == "__main__":
-    if not os.path.exists('./{}/shap_TH_ac_plot/'.format(folder_name)):
-        os.mkdir('./{}/shap_TH_ac_plot/'.format(folder_name))
-    if not os.path.exists('./{}/shap_T_ac_plot/'.format(folder_name)):
-        os.mkdir('./{}/shap_T_ac_plot/'.format(folder_name))
-    if not os.path.exists('./{}/distribution_plot/'.format(folder_name)):
-        os.mkdir('./{}/distribution_plot/'.format(folder_name))
-    # if not os.path.exists('./{}/SMOTE_room/'.format(folder_name)):
-    #     os.mkdir('./{}/SMOTE_room/'.format(folder_name))
-    label_dict = {332: 'C', 903: '1', 328: 'D', 630: '2', 821: 'A', 910: '3', 1007: 'B', 1011: '4'}
-    for room in tqdm(room_list):
-        # Delete the rooms with low quality data manually.
-        if room == 309 or room == 312 or room == 826 or room == 917 or room == 1001:
-            continue
-        # view_shap_importance(room)  # This function will pop up a demo window for each room.
-        plot_shap_interact(room)
-        plot_distribution(room)
-    # plot_error_distribution(23)
-    # plot_room_number_data_and_R2()
+    for folder_name in ['Test_R2_HYPEROPT_SMOTE','Test_R2_HYPEROPT_SHUFFLED_SMOTE']:
+        print(folder_name)
+        if not os.path.exists('./{}/shap_TH_ac_plot/'.format(folder_name)):
+            os.mkdir('./{}/shap_TH_ac_plot/'.format(folder_name))
+        if not os.path.exists('./{}/shap_T_ac_plot/'.format(folder_name)):
+            os.mkdir('./{}/shap_T_ac_plot/'.format(folder_name))
+        if not os.path.exists('./{}/distribution_plot/'.format(folder_name)):
+            os.mkdir('./{}/distribution_plot/'.format(folder_name))
+        # if not os.path.exists('./{}/SMOTE_room/'.format(folder_name)):
+        #     os.mkdir('./{}/SMOTE_room/'.format(folder_name))
+        label_dict = {332: 'C', 903: '1', 328: 'D', 630: '2', 821: 'A', 910: '3', 1007: 'B', 1011: '4'}
+        for room in tqdm(room_list):
+            # Delete the rooms with low quality data manually.
+            if room == 309 or room == 312 or room == 826 or room == 917 or room == 1001:
+                continue
+            # view_shap_importance(room)  # This function will pop up a demo window for each room.
+            # plot_shap_interact(room)
+            plot_distribution(room)
+        # plot_error_distribution(23)
+        # plot_room_number_data_and_R2()
